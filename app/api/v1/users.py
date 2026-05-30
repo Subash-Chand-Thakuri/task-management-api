@@ -1,16 +1,19 @@
-from fastapi import APIRouter, Depends, status
+from typing import Literal
+
+from fastapi import APIRouter, Depends, Query, status
 
 from app.api.deps import (
     DbSession,
     RequireAdmin,
     RequireAuth,
+    RequireAnyRole,
     RequireManagerOrAdmin,
     get_auth_context,
 )
-from app.schemas.response import ApiResponse
+from app.schemas.response import ApiResponse, PaginatedData
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.services import user_service
-from app.utils.responses import success_response
+from app.utils.responses import paginated_response, success_response
 from app.utils.validators import ensure_positive_id
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -38,10 +41,30 @@ async def read_current_user(auth: RequireAuth):
     return success_response(auth.user)
 
 
-@protected_router.get("/", response_model=ApiResponse[list[UserRead]])
-async def list_users(session: DbSession, auth: RequireAdmin):
-    users = await user_service.list_users(session)
-    return success_response(users)
+@protected_router.get("/", response_model=ApiResponse[PaginatedData[UserRead]])
+async def list_users(
+    session: DbSession,
+    auth: RequireAnyRole,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1),
+    sort: str = Query("id"),
+    order: Literal["asc", "desc"] = Query("asc"),
+    role_id: int | None = Query(None),
+    is_active: bool | None = Query(None),
+    search: str | None = Query(None),
+):
+    users, total = await user_service.list_users(
+        session,
+        auth,
+        page=page,
+        page_size=page_size,
+        sort=sort,
+        order=order,
+        role_id=role_id,
+        is_active=is_active,
+        search=search,
+    )
+    return paginated_response(users, page=page, page_size=page_size, total=total)
 
 
 @protected_router.get("/{user_id}", response_model=ApiResponse[UserRead])

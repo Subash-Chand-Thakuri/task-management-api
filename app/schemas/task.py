@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.models.task import TaskStatus
+from app.utils.datetime_utils import to_naive_utc
 
 
 class Task(BaseModel):
@@ -24,7 +25,11 @@ class TaskCreate(BaseModel):
     description: str | None = None
     due_date: datetime | None = None
     assigned_to: int | None = None
-    created_by: int | None = None
+
+    @field_validator("due_date", mode="after")
+    @classmethod
+    def normalize_due_date(cls, value: datetime | None) -> datetime | None:
+        return to_naive_utc(value)
 
 
 class TaskUpdate(BaseModel):
@@ -33,3 +38,8 @@ class TaskUpdate(BaseModel):
     status: TaskStatus | None = None
     due_date: datetime | None = None
     assigned_to: int | None = None
+
+    @field_validator("due_date", mode="after")
+    @classmethod
+    def normalize_due_date(cls, value: datetime | None) -> datetime | None:
+        return to_naive_utc(value)
