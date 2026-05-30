@@ -355,7 +355,7 @@ Migrations live in `alembic/versions/` and should be committed to git.
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | **Swagger UI**          | `http://127.0.0.1:8000/docs`                                                                                         |
 | **ReDoc**               | `http://127.0.0.1:8000/redoc`                                                                                        |
-| **Swagger testing PDF** | [SWAGGER.md](docs/SWAGGER.md) → [PDF report](docs/assets/task-management-api%20-%20Swagger%20UI.pdf)                 |
+| **Swagger testing PDF** | [SWAGGER.md](SWAGGER.md) → [PDF report](docs/assets/task-management-api%20-%20Swagger%20UI.pdf)                      |
 | **Postman collection**  | [docs/postman/Task-Management-API.postman_collection.json](docs/postman/Task-Management-API.postman_collection.json) |
 
 Import the Postman collection, set the `baseUrl` variable, run **Auth → Login**, then use other requests (token is saved automatically).
