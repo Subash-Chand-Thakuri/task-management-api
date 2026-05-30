@@ -1,6 +1,6 @@
-from datetime import datetime
+from enum import Enum
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, Enum, func
+from sqlalchemy import Column, DateTime, Enum as SQLEnum, ForeignKey, Integer, String, func
 
 from app.db.base import Base
 
@@ -16,7 +16,12 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     description = Column(String, nullable=True)
-    status = Column(Enum(TaskStatus), default=TaskStatus.PENDING)
+    status = Column(
+        SQLEnum(TaskStatus, name="task_status"),
+        default=TaskStatus.PENDING,
+        nullable=False,
+    )
+    due_date = Column(DateTime, nullable=True)
     assigned_to = Column(Integer, ForeignKey("users.id"))
     created_by = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, server_default=func.now())

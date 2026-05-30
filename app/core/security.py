@@ -1,4 +1,43 @@
-from fastapi.security import OAuth2PasswordBearer
+from datetime import UTC, datetime, timedelta
+
+import bcrypt
+from fastapi.security import HTTPBearer
+from jose import JWTError, jwt
+
+from app.core.config import settings
+from app.core.exceptions import UnauthorizedError
+
+# Reads: Authorization: Bearer <jwt>  (not Google/GitHub OAuth)
+bearer_scheme = HTTPBearer()
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(
+        plain_password.encode("utf-8"),
+        hashed_password.encode("utf-8"),
+    )
+
+
+def create_access_token(subject: str) -> str:
+    expire = datetime.now(UTC) + timedelta(minutes=settings.access_token_expire_minutes)
+    payload = {"sub": subject, "exp": expire}
+    return jwt.encode(
+        payload,
+        settings.jwt_secret_key,
+        algorithm=settings.jwt_algorithm,
+    )
+
+
+def decode_access_token(token: str) -> dict:
+    try:
+        return jwt.decode(
+            token,
+            settings.jwt_secret_key,
+            algorithms=[settings.jwt_algorithm],
+        )
+    except JWTError as exc:
+        raise UnauthorizedError("Invalid or expired token") from exc
