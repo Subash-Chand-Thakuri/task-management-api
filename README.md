@@ -16,10 +16,10 @@ This project uses **`pyproject.toml`** as the single source of truth for the Pyt
 
 `pyproject.toml` is the standard modern Python project file (PEP 621). In this repo it defines:
 
-| Section | Purpose |
-|---------|---------|
-| `[project]` | Project name, version, Python version (`>=3.10`), and **dependencies** (FastAPI, SQLAlchemy, Alembic, pytest, etc.) |
-| `[project.scripts]` | CLI entry points — e.g. `uv run seed-db` runs the database seed script |
+| Section             | Purpose                                                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `[project]`         | Project name, version, Python version (`>=3.10`), and **dependencies** (FastAPI, SQLAlchemy, Alembic, pytest, etc.) |
+| `[project.scripts]` | CLI entry points — e.g. `uv run seed-db` runs the database seed script                                              |
 
 Instead of a separate `requirements.txt`, everything lives in one file that tools and IDEs understand. When you add a dependency, you update `pyproject.toml` (and commit `uv.lock` for reproducible installs).
 
@@ -27,11 +27,11 @@ Instead of a separate `requirements.txt`, everything lives in one file that tool
 
 [uv](https://docs.astral.sh/uv/) is a fast Python package and project manager (by Astral, same team as Ruff). It replaces the usual combo of `pip`, `venv`, and `pip-tools` with one tool.
 
-| Command | What it does |
-|---------|----------------|
-| `uv sync` | Creates/updates `.venv` and installs exact versions from `uv.lock` |
+| Command            | What it does                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `uv sync`          | Creates/updates `.venv` and installs exact versions from `uv.lock`                   |
 | `uv run <command>` | Runs a command inside the project virtualenv (no manual `source .venv/bin/activate`) |
-| `uv add <package>` | Adds a dependency to `pyproject.toml` and updates the lockfile |
+| `uv add <package>` | Adds a dependency to `pyproject.toml` and updates the lockfile                       |
 
 **Why we use it here:**
 
@@ -129,26 +129,26 @@ docker compose exec task-management-api uv run alembic upgrade head
 
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DATABASE_URL` | Yes | — | Async Postgres URL, e.g. `postgresql+asyncpg://user:pass@localhost:5432/dbname` |
-| `JWT_SECRET_KEY` | No | `jwt_secret_key` | Secret for signing JWT access tokens. **Change in production.** |
-| `JWT_ALGORITHM` | No | `HS256` | JWT signing algorithm |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | No | `60` | Token lifetime in minutes |
-| `ADMIN_EMAIL` | No | `admin@mailsac.com` | Seed admin email |
-| `ADMIN_PASSWORD` | No | `Password111!` | Seed admin password |
-| `ADMIN_NAME` | No | `System Admin` | Seed admin display name |
-| `SEED_ON_STARTUP` | No | `true` | Seed roles + admin on app startup |
-| `DEBUG` | No | `true` | SQLAlchemy echo / debug mode |
-| `APP_NAME` | No | `task-management-api` | Application name |
+| Variable                      | Required | Default               | Description                                                                     |
+| ----------------------------- | -------- | --------------------- | ------------------------------------------------------------------------------- |
+| `DATABASE_URL`                | Yes      | —                     | Async Postgres URL, e.g. `postgresql+asyncpg://user:pass@localhost:5432/dbname` |
+| `JWT_SECRET_KEY`              | No       | `jwt_secret_key`      | Secret for signing JWT access tokens. **Change in production.**                 |
+| `JWT_ALGORITHM`               | No       | `HS256`               | JWT signing algorithm                                                           |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | No       | `60`                  | Token lifetime in minutes                                                       |
+| `ADMIN_EMAIL`                 | No       | `admin@mailsac.com`   | Seed admin email                                                                |
+| `ADMIN_PASSWORD`              | No       | `Password111!`        | Seed admin password                                                             |
+| `ADMIN_NAME`                  | No       | `System Admin`        | Seed admin display name                                                         |
+| `SEED_ON_STARTUP`             | No       | `true`                | Seed roles + admin on app startup                                               |
+| `DEBUG`                       | No       | `true`                | SQLAlchemy echo / debug mode                                                    |
+| `APP_NAME`                    | No       | `task-management-api` | Application name                                                                |
 
 Docker-only (used in `docker-compose.yml`):
 
-| Variable | Description |
-|----------|-------------|
-| `POSTGRES_USER` | Postgres username |
-| `POSTGRES_PASSWORD` | Postgres password |
-| `POSTGRES_DB` | Postgres database name |
+| Variable            | Description            |
+| ------------------- | ---------------------- |
+| `POSTGRES_USER`     | Postgres username      |
+| `POSTGRES_PASSWORD` | Postgres password      |
+| `POSTGRES_DB`       | Postgres database name |
 
 Example `.env`:
 
@@ -205,7 +205,7 @@ All endpoints return a consistent shape:
 {
   "success": true,
   "message": "OK",
-  "data": { },
+  "data": {},
   "errors": null
 }
 ```
@@ -217,7 +217,7 @@ Paginated lists wrap items like this:
   "success": true,
   "message": "OK",
   "data": {
-    "items": [ ],
+    "items": [],
     "pagination": {
       "page": 1,
       "page_size": 10,
@@ -230,50 +230,50 @@ Paginated lists wrap items like this:
 
 ### Endpoints summary
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/health` | — | Health check |
-| POST | `/v1/auth/login` | — | Login, get JWT |
-| POST | `/v1/users/` | — | Sign up (defaults to USER role) |
-| GET | `/v1/users/me` | Any | Current user profile |
-| GET | `/v1/users/` | Any | List users (paginated, role-filtered) |
-| GET | `/v1/users/{id}` | Manager+ | Get user by ID |
-| PUT | `/v1/users/{id}` | Manager+ | Update user |
-| DELETE | `/v1/users/{id}` | Admin | Delete user |
-| GET | `/v1/roles/` | — | List roles |
-| GET | `/v1/roles/{id}` | — | Get role |
-| POST | `/v1/roles/` | Admin | Create role |
-| PUT | `/v1/roles/{id}` | Admin | Update role |
-| DELETE | `/v1/roles/{id}` | Admin | Delete role |
-| GET | `/v1/tasks/` | Any | List tasks (paginated, role-filtered) |
-| POST | `/v1/tasks/` | Manager+ | Create task |
-| GET | `/v1/tasks/{id}` | Any | Get task (access-checked) |
-| PUT | `/v1/tasks/{id}` | Any | Update task (field rules by role) |
-| DELETE | `/v1/tasks/{id}` | Admin | Delete task |
+| Method | Path             | Auth     | Description                           |
+| ------ | ---------------- | -------- | ------------------------------------- |
+| GET    | `/health`        | —        | Health check                          |
+| POST   | `/v1/auth/login` | —        | Login, get JWT                        |
+| POST   | `/v1/users/`     | —        | Sign up (defaults to USER role)       |
+| GET    | `/v1/users/me`   | Any      | Current user profile                  |
+| GET    | `/v1/users/`     | Any      | List users (paginated, role-filtered) |
+| GET    | `/v1/users/{id}` | Manager+ | Get user by ID                        |
+| PUT    | `/v1/users/{id}` | Manager+ | Update user                           |
+| DELETE | `/v1/users/{id}` | Admin    | Delete user                           |
+| GET    | `/v1/roles/`     | —        | List roles                            |
+| GET    | `/v1/roles/{id}` | —        | Get role                              |
+| POST   | `/v1/roles/`     | Admin    | Create role                           |
+| PUT    | `/v1/roles/{id}` | Admin    | Update role                           |
+| DELETE | `/v1/roles/{id}` | Admin    | Delete role                           |
+| GET    | `/v1/tasks/`     | Any      | List tasks (paginated, role-filtered) |
+| POST   | `/v1/tasks/`     | Manager+ | Create task                           |
+| GET    | `/v1/tasks/{id}` | Any      | Get task (access-checked)             |
+| PUT    | `/v1/tasks/{id}` | Any      | Update task (field rules by role)     |
+| DELETE | `/v1/tasks/{id}` | Admin    | Delete task                           |
 
 ### Query parameters (list endpoints)
 
 **Tasks** — `GET /v1/tasks/`
 
-| Param | Default | Description |
-|-------|---------|-------------|
-| `page` | `1` | Page number (≥ 1) |
-| `page_size` | `10` | Items per page (≥ 1) |
-| `sort` | `created_at` | `id`, `title`, `status`, `due_date`, `created_at`, `updated_at` |
-| `order` | `asc` | `asc` or `desc` |
-| `search` | — | Filter by title or description |
+| Param       | Default      | Description                                                     |
+| ----------- | ------------ | --------------------------------------------------------------- |
+| `page`      | `1`          | Page number (≥ 1)                                               |
+| `page_size` | `10`         | Items per page (≥ 1)                                            |
+| `sort`      | `created_at` | `id`, `title`, `status`, `due_date`, `created_at`, `updated_at` |
+| `order`     | `asc`        | `asc` or `desc`                                                 |
+| `search`    | —            | Filter by title or description                                  |
 
 **Users** — `GET /v1/users/`
 
-| Param | Default | Description |
-|-------|---------|-------------|
-| `page` | `1` | Page number |
-| `page_size` | `10` | Items per page |
-| `sort` | `id` | `id`, `email`, `name`, `is_active`, `role_id`, `created_at`, `updated_at` |
-| `order` | `asc` | `asc` or `desc` |
-| `role_id` | — | Filter by role |
-| `is_active` | — | Filter by active status |
-| `search` | — | Filter by name or email |
+| Param       | Default | Description                                                               |
+| ----------- | ------- | ------------------------------------------------------------------------- |
+| `page`      | `1`     | Page number                                                               |
+| `page_size` | `10`    | Items per page                                                            |
+| `sort`      | `id`    | `id`, `email`, `name`, `is_active`, `role_id`, `created_at`, `updated_at` |
+| `order`     | `asc`   | `asc` or `desc`                                                           |
+| `role_id`   | —       | Filter by role                                                            |
+| `is_active` | —       | Filter by active status                                                   |
+| `search`    | —       | Filter by name or email                                                   |
 
 Example:
 
@@ -286,22 +286,22 @@ Authorization: Bearer <token>
 
 **Tasks**
 
-| Role | List / get | Create | Update | Delete |
-|------|------------|--------|--------|--------|
-| Admin | All tasks | Yes | All fields | Yes |
-| Manager | Assigned to or created by them | Yes | `status` only | No |
-| User | Assigned to them | No | `status` only | No |
+| Role    | List / get                     | Create | Update        | Delete |
+| ------- | ------------------------------ | ------ | ------------- | ------ |
+| Admin   | All tasks                      | Yes    | All fields    | Yes    |
+| Manager | Assigned to or created by them | Yes    | `status` only | No     |
+| User    | Assigned to them               | No     | `status` only | No     |
 
 - Completed tasks **cannot** be reverted to `PENDING`.
 - Managers assign users via `assigned_to` on **create**.
 
 **Users**
 
-| Role | List | Get / update others | Delete |
-|------|------|---------------------|--------|
-| Admin | All users | Yes | Yes |
-| Manager | Self + USER-role accounts | Yes | No |
-| User | Self only | No (except `/me`) | No |
+| Role    | List                      | Get / update others | Delete |
+| ------- | ------------------------- | ------------------- | ------ |
+| Admin   | All users                 | Yes                 | Yes    |
+| Manager | Self + USER-role accounts | Yes                 | No     |
+| User    | Self only                 | No (except `/me`)   | No     |
 
 ---
 
@@ -323,15 +323,15 @@ app/models/          SQLAlchemy ORM
 PostgreSQL
 ```
 
-| Layer | Responsibility |
-|-------|----------------|
-| **API** (`app/api/`) | HTTP routing, request validation (Pydantic), auth dependencies |
-| **Services** (`app/services/`) | RBAC filtering, pagination, business rules |
-| **Schemas** (`app/schemas/`) | Request/response models |
-| **Models** (`app/models/`) | Database tables |
-| **Core** (`app/core/`) | Config, JWT, exceptions, logging |
-| **DB** (`app/db/`) | Engine, session, seed |
-| **Utils** (`app/utils/`) | Standard responses, validators |
+| Layer                          | Responsibility                                                 |
+| ------------------------------ | -------------------------------------------------------------- |
+| **API** (`app/api/`)           | HTTP routing, request validation (Pydantic), auth dependencies |
+| **Services** (`app/services/`) | RBAC filtering, pagination, business rules                     |
+| **Schemas** (`app/schemas/`)   | Request/response models                                        |
+| **Models** (`app/models/`)     | Database tables                                                |
+| **Core** (`app/core/`)         | Config, JWT, exceptions, logging                               |
+| **DB** (`app/db/`)             | Engine, session, seed                                          |
+| **Utils** (`app/utils/`)       | Standard responses, validators                                 |
 
 Auth flow:
 
@@ -343,7 +343,7 @@ Auth flow:
 
 ## Database
 
-See **[docs/DATABASE.md](docs/DATABASE.md)** for ERD, table descriptions, and migration notes.
+See **[DATABASE.md](DATABASE.md)** for ERD, table descriptions, and migration notes.
 
 Migrations live in `alembic/versions/` and should be committed to git.
 
@@ -351,12 +351,12 @@ Migrations live in `alembic/versions/` and should be committed to git.
 
 ## API Testing
 
-| Option | Location |
-|--------|----------|
-| **Swagger UI** | `http://127.0.0.1:8000/docs` |
-| **ReDoc** | `http://127.0.0.1:8000/redoc` |
-| **Swagger testing PDF** | [docs/SWAGGER.md](docs/SWAGGER.md) → [PDF report](docs/assets/task-management-api%20-%20Swagger%20UI.pdf) |
-| **Postman collection** | [docs/postman/Task-Management-API.postman_collection.json](docs/postman/Task-Management-API.postman_collection.json) |
+| Option                  | Location                                                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Swagger UI**          | `http://127.0.0.1:8000/docs`                                                                                         |
+| **ReDoc**               | `http://127.0.0.1:8000/redoc`                                                                                        |
+| **Swagger testing PDF** | [SWAGGER.md](docs/SWAGGER.md) → [PDF report](docs/assets/task-management-api%20-%20Swagger%20UI.pdf)                 |
+| **Postman collection**  | [docs/postman/Task-Management-API.postman_collection.json](docs/postman/Task-Management-API.postman_collection.json) |
 
 Import the Postman collection, set the `baseUrl` variable, run **Auth → Login**, then use other requests (token is saved automatically).
 
